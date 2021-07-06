@@ -14,6 +14,7 @@ count = False
 death_time = 0
 perm_dt = 1
 pink = (153, 0, 153)
+distance = 0
 
 # FPS
 clock = pygame.time.Clock()
@@ -66,7 +67,7 @@ class Car(pygame.sprite.Sprite):
         self.position = vec(638, 440)
         self.rect = self.original_image.get_rect(center=self.position)
         self.vel = vec(0, 0)
-        self.acceleration = vec(1.5, 0)
+        self.acceleration = vec(2, 0)
         self.angle_speed = 0
         self.angle = 0
         self.time = 0
@@ -127,6 +128,21 @@ class Car(pygame.sprite.Sprite):
             self.roundtime = pygame.time.get_ticks()
 
 
+class Sensor_s(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("C:/Users/aleks/Desktop/sensor_straight.png").convert_alpha()
+        self.original_image = self.image
+        self.position = car.position
+        self.rect = self.original_image.get_rect(center=self.position)
+
+    def update(self):
+        self.position = car.position
+        self.rect.center = self.position
+
+        self.image = pygame.transform.rotate(self.original_image, -car.angle)
+        self.rect = self.image.get_rect(center=self.rect.center)
+        self.mask = pygame.mask.from_surface(self.image)
 
 class Rand(pygame.sprite.Sprite):
     def __init__(self):
@@ -147,13 +163,20 @@ class Ziel(pygame.sprite.Sprite):
         self.rect = self.original_image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
 
+def distance_sensor_s():
+    global distance
+    global vec_sensor_s
+    vec_sensor_s = (car.position + pygame.sprite.collide_mask(car, sensor_s)) - (pygame.sprite.collide_mask(rand, sensor_s))
+    distance = vec_sensor_s.length()
+
 
 strecke = pygame.image.load("C:/Users/aleks/Desktop/rennstrecke.png").convert_alpha()
 all_sprites = pygame.sprite.Group()
 car = Car()
 rand = Rand()
+sensor_s = Sensor_s()
 ziel = Ziel()
-all_sprites.add(ziel, rand, car)
+all_sprites.add(ziel, sensor_s, rand, car)
 
 # engine
 loop = True
@@ -171,11 +194,17 @@ while loop:
     all_sprites.draw(screen)
     if col_pos != None:
         pygame.draw.line(screen, pink, (0, 0), col_pos, width = 2)
-
+    if pygame.sprite.collide_mask(car, sensor_s) != None:
+        pygame.draw.line(screen, pink, (0, 0), pygame.sprite.collide_mask(car, sensor_s), width=2)
+    if pygame.sprite.collide_mask(rand, sensor_s) != None:
+        pygame.draw.line(screen, pink, (0, 0), pygame.sprite.collide_mask(rand, sensor_s), width = 2)
+    distance_sensor_s()
     screen.blit(update_fps(), (10, 10))
     screen.blit(update_death_time(death_time), (10, 50))
     screen.blit(update_timer(), (10, 30))
     pygame.display.set_caption('vel {:.1f}'.format((car.vel.length()/5)*100))
+    #print(distance)
+    print(pygame.sprite.collide_mask(car, sensor_s))
     pygame.display.update()
 
     clock.tick(60)
