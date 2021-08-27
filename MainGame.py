@@ -8,12 +8,12 @@ width, height = 1280, 720
 screen = pygame.display.set_mode((width, height))
 vec = pygame.math.Vector2
 max_speed = 5
-perm = True
 dt = 0
 count = False
 death_time = 0
 perm_dt = 1
 pink = (153, 0, 153)
+blue = (176, 224, 230)
 distance = 0
 
 # FPS
@@ -35,28 +35,6 @@ def update_timer():
     time_text = font.render(time, bool(1), pygame.Color("coral"))
     return time_text
 
-# collision
-
-def collision():
-    global perm_dt
-    global dt
-    global perm
-    global death_time
-    global col_pos
-    col_pos = pygame.sprite.collide_mask(rand, car)
-    if col_pos != None:
-        perm = False
-        car.vel = vec(0, 0)
-        if perm_dt == 1:
-            dt = 1
-            death_time = pygame.time.get_ticks()
-            perm_dt -= 1
-
-
-def update_death_time(death_time):
-    death_time_val = str(death_time/1000)
-    death_time_text = font.render(death_time_val, bool(1), pygame.Color("coral"))
-    return death_time_text
 
 # sprite
 class Car(pygame.sprite.Sprite):
@@ -74,12 +52,17 @@ class Car(pygame.sprite.Sprite):
         self.roundtime = 0
         self.touch_line = 0
         self.col_line = None
+        self.perm = True
 
+    def update_death_time(self, death_time):
+        death_time_val = str(death_time / 1000)
+        death_time_text = font.render(death_time_val, bool(1), pygame.Color("coral"))
+        return death_time_text
 
     def update(self):
         global count
         keys = pygame.key.get_pressed()
-        if perm == True:
+        if perm:
             if keys[K_a]:
                 self.angle_speed = -4
                 car.rotate()
@@ -88,7 +71,7 @@ class Car(pygame.sprite.Sprite):
                 car.rotate()
             if keys[K_w]:
                 self.vel += self.acceleration
-                if count == False:
+                if not count:
                     self.time = pygame.time.get_ticks()
                     count = True
             if not keys[K_w]:
@@ -127,7 +110,21 @@ class Car(pygame.sprite.Sprite):
         if self.touch_line == 1:
             self.roundtime = pygame.time.get_ticks()
 
+    def collision(self):
+        global perm_dt
+        global dt
+        global perm
+        global death_time
+        self.col_pos = pygame.sprite.collide_mask(rand, car)
+        if self.col_pos is not None:
+            perm = False
+            car.vel = vec(0, 0)
+            if perm_dt == 1:
+                dt = 1
+                death_time = pygame.time.get_ticks()
+                perm_dt -= 1
 
+#mit dem auto:
 class Sensor_s(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -185,24 +182,22 @@ while loop:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit(0)
-    collision()
+    car.collision()
     all_sprites.update()
     car.touchfl()
     car.timecount()
 
     screen.blit(strecke, (0, 0))
     all_sprites.draw(screen)
-    if col_pos != None:
-        pygame.draw.line(screen, pink, (0, 0), col_pos, width = 2)
-    if pygame.sprite.collide_mask(car, sensor_s) != None:
-        pygame.draw.line(screen, pink, (0, 0), pygame.sprite.collide_mask(car, sensor_s), width=2)
+    if car.col_pos != None:
+        pygame.draw.line(screen, pink, (0, 0), car.col_pos, width = 2)
     if pygame.sprite.collide_mask(rand, sensor_s) != None:
         pygame.draw.line(screen, pink, (0, 0), pygame.sprite.collide_mask(rand, sensor_s), width = 2)
     distance_sensor_s()
     screen.blit(update_fps(), (10, 10))
-    screen.blit(update_death_time(death_time), (10, 50))
+    screen.blit(car.update_death_time(death_time), (10, 50))
     screen.blit(update_timer(), (10, 30))
-    pygame.display.set_caption('vel {:.1f}'.format((car.vel.length()/5)*100))
+    pygame.display.set_caption('Alex Maturarbeit')
     #print(distance)
     print(pygame.sprite.collide_mask(car, sensor_s))
     pygame.display.update()
