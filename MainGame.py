@@ -1,4 +1,5 @@
 import pygame
+from config import asset_path as ap
 from pygame.locals import *
 
 
@@ -40,7 +41,7 @@ def update_timer():
 class Car(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("C:/Users/aleks/Desktop/car_2.png").convert_alpha()
+        self.image = pygame.image.load(ap.joinpath("car_2.png")).convert_alpha()
         self.original_image = self.image
         self.position = vec(638, 440)
         self.rect = self.original_image.get_rect(center=self.position)
@@ -62,7 +63,7 @@ class Car(pygame.sprite.Sprite):
     def update(self):
         global count
         keys = pygame.key.get_pressed()
-        if perm:
+        if self.perm:
             if keys[K_a]:
                 self.angle_speed = -4
                 car.rotate()
@@ -113,11 +114,10 @@ class Car(pygame.sprite.Sprite):
     def collision(self):
         global perm_dt
         global dt
-        global perm
         global death_time
         self.col_pos = pygame.sprite.collide_mask(rand, car)
         if self.col_pos is not None:
-            perm = False
+            self.perm = False
             car.vel = vec(0, 0)
             if perm_dt == 1:
                 dt = 1
@@ -128,7 +128,7 @@ class Car(pygame.sprite.Sprite):
 class Sensor_s(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("C:/Users/aleks/Desktop/sensor_straight.png").convert_alpha()
+        self.image = pygame.image.load(ap.joinpath("sensor_straight.png")).convert_alpha()
         self.original_image = self.image
         self.position = car.position
         self.rect = self.original_image.get_rect(center=self.position)
@@ -144,7 +144,7 @@ class Sensor_s(pygame.sprite.Sprite):
 class Rand(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("C:/Users/aleks/Desktop/rennstrecke_rand.png").convert_alpha()
+        self.image = pygame.image.load(ap.joinpath("rennstrecke_rand.png")).convert_alpha()
         self.position = vec(0, 0)
         self.original_image = self.image
         self.rect = self.original_image.get_rect()
@@ -154,7 +154,7 @@ class Rand(pygame.sprite.Sprite):
 class Ziel(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("C:/Users/aleks/Desktop/rennstrecke_ziel.png").convert_alpha()
+        self.image = pygame.image.load(ap.joinpath("rennstrecke_ziel.png")).convert_alpha()
         self.position = vec(0, 0)
         self.original_image = self.image
         self.rect = self.original_image.get_rect()
@@ -167,7 +167,7 @@ def distance_sensor_s():
     distance = vec_sensor_s.length()
 
 
-strecke = pygame.image.load("C:/Users/aleks/Desktop/rennstrecke.png").convert_alpha()
+strecke = pygame.image.load(ap.joinpath("rennstrecke.png")).convert_alpha()
 all_sprites = pygame.sprite.Group()
 car = Car()
 rand = Rand()
