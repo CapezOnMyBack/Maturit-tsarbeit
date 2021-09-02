@@ -55,6 +55,23 @@ class Car(pygame.sprite.Sprite):
         self.col_line = None
         self.perm = True
 
+        #pygame.draw.line(screen, blue, (car.position), (car.position + 30 * car.vel), width=2)
+
+    def sensor_front(self):
+        mask_R = pygame.mask.from_surface(pygame.image.load(ap.joinpath("rennstrecke_rand.png")).convert_alpha())
+        hit = False
+        distance_multiplier = 1
+        while not hit:
+            distance_pos = (self.position + distance_multiplier * car.vel)
+            pos_x = abs(int(distance_pos[0]))
+            pos_y = abs(int(distance_pos[1]))
+            sensor_hit = mask_R.get_at((pos_x, pos_y))
+            if sensor_hit == 0:
+                distance_multiplier += 15
+            else:
+                hit = True
+            print(sensor_hit)
+
     def update_death_time(self, death_time):
         death_time_val = str(death_time / 1000)
         death_time_text = font.render(death_time_val, bool(1), pygame.Color("coral"))
@@ -161,10 +178,12 @@ while loop:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit(0)
+
     car.collision()
     all_sprites.update()
     car.touchfl()
     car.timecount()
+    car.sensor_front()
 
     screen.blit(strecke, (0, 0))
     all_sprites.draw(screen)
@@ -173,6 +192,8 @@ while loop:
 
     pygame.draw.line(screen, blue, (car.position), (car.position + 30*car.vel) , width=2)
 
+    #print(car.position + 30*car.vel)
+
 
     screen.blit(update_fps(), (10, 10))
     screen.blit(car.update_death_time(death_time), (10, 50))
@@ -180,7 +201,6 @@ while loop:
     pygame.display.set_caption('Alex Maturarbeit')
     #print(distance)
     #print(pygame.sprite.collide_mask(car, sensor_s))
-    print(car.vel)
     pygame.display.update()
 
     clock.tick(60)
