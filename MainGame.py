@@ -1,5 +1,5 @@
 import pygame
-from config import asset_path as ap
+from config import get_Asset as gA
 from pygame.locals import *
 
 
@@ -14,7 +14,7 @@ count = False
 death_time = 0
 perm_dt = 1
 pink = (153, 0, 153)
-blue = (176, 120, 230)
+blue = (56, 165, 255)
 distance = 0
 
 # FPS
@@ -41,7 +41,7 @@ def update_timer():
 class Car(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(ap.joinpath("car_2.png")).convert_alpha()
+        self.image = pygame.image.load(gA("car_2.png")).convert_alpha()
         self.original_image = self.image
         self.position = vec(638, 440)
         self.rect = self.original_image.get_rect(center=self.position)
@@ -54,28 +54,118 @@ class Car(pygame.sprite.Sprite):
         self.touch_line = 0
         self.col_line = None
         self.perm = True
-        self.sensor_hit = (0, 0)
+        self.distance_f = (0.0, 0.0)
+        self.distance_R = (0.0, 0.0)
+        self.distance_L = (0.0, 0.0)
+        self.distance_f_R = (0.0, 0.0)
+        self.distance_f_L = (0.0, 0.0)
+        self.mask_R = pygame.mask.from_surface(pygame.image.load(gA("rennstrecke_rand.png")).convert_alpha())
 
-        #pygame.draw.line(screen, blue, (car.position), (car.position + 30 * car.vel), width=2)
+    #---------------------------------------------------------------------------------------------------------
+    #SENSOR FUNCTIONS:
 
     def sensor_front(self):
-        mask_R = pygame.mask.from_surface(pygame.image.load(ap.joinpath("rennstrecke_rand.png")).convert_alpha())
 
-        for distance_multiplier in range(1, 129):
-            self.distance_pos = (self.position + 1.05 ** distance_multiplier * car.vel)
-            pos_x = abs(int(self.distance_pos[0]))
-            pos_y = abs(int(self.distance_pos[1]))
+        for distance_multiplier in range(1, 80):
+            self.distance_f = (self.position + 1.5 ** (distance_multiplier/6) * self.vel)
+            pos_x = abs(int(self.distance_f[0]))
+            pos_y = abs(int(self.distance_f[1]))
             if pos_x >= 1279:
                 pos_x = 1279
             if pos_y >= 719:
                 pos_y = 719
-            sensor_hit = mask_R.get_at((pos_x, pos_y))
+            sensor_hit = self.mask_R.get_at((pos_x, pos_y))
 
             if sensor_hit == 1:
-
                 break
 
+    def sensor_front_R(self):
+
+        for distance_multiplier in range(1, 80):
+            self.distance_f_R = (self.position + 1.5 ** (distance_multiplier/6) * self.vel.rotate(30))
+            pos_x = abs(int(self.distance_f_R[0]))
+            pos_y = abs(int(self.distance_f_R[1]))
+            if pos_x >= 1279:
+                pos_x = 1279
+            if pos_y >= 719:
+                pos_y = 719
+            sensor_hit = self.mask_R.get_at((pos_x, pos_y))
+
+            if sensor_hit == 1:
+                break
+
+    def sensor_front_L(self):
+
+        for distance_multiplier in range(1, 80):
+            self.distance_f_L = (self.position + 1.5 ** (distance_multiplier/6) * self.vel.rotate(-30))
+            pos_x = abs(int(self.distance_f_L[0]))
+            pos_y = abs(int(self.distance_f_L[1]))
+            if pos_x >= 1279:
+                pos_x = 1279
+            if pos_y >= 719:
+                pos_y = 719
+            sensor_hit = self.mask_R.get_at((pos_x, pos_y))
+
+            if sensor_hit == 1:
+                break
+
+    def sensor_back_R(self):
+
+        for distance_multiplier in range(1, 80):
+            self.distance_R = ((self.position - 4*self.vel) + 1.5 ** (distance_multiplier/6) * self.vel.rotate(90))
+            pos_x = abs(int(self.distance_R[0]))
+            pos_y = abs(int(self.distance_R[1]))
+            if pos_x >= 1279:
+                pos_x = 1279
+            if pos_y >= 719:
+                pos_y = 719
+            sensor_hit = self.mask_R.get_at((pos_x, pos_y))
+
+            if sensor_hit == 1:
+                break
+    
+    def sensor_back_L(self):
+
+        for distance_multiplier in range(1, 80):
+            self.distance_L = ((self.position - 4*self.vel) + 1.5 ** (distance_multiplier/6) * self.vel.rotate(-90))
+            pos_x = abs(int(self.distance_L[0]))
+            pos_y = abs(int(self.distance_L[1]))
+            if pos_x >= 1279:
+                pos_x = 1279
+            if pos_y >= 719:
+                pos_y = 719
+            sensor_hit = self.mask_R.get_at((pos_x, pos_y))
+
+            if sensor_hit == 1:
+                break
+
+    #------------------------------------------------------------------------------------------------
+    #DISTANCE UPDATES:
+
+    def update_distance_f(self):
+        value_distance_f = str(round((abs((self.distance_f - self.position).length()) / 100), 2))
+        value_distance_f_text = font.render(value_distance_f , bool(1), pygame.Color("coral"))
+
+        return value_distance_f_text
+
+    def update_distance_f_R(self):
+
+        value_distance_f_R = str(round((abs((self.distance_f_R - self.position).length()) / 100), 2))
+        value_distance_f_R_text = font.render(value_distance_f_R, bool(1), pygame.Color("coral"))
+
+        return value_distance_f_R_text
+
+    def update_distance_f_L(self):
+
+        value_distance_f_L = str(round((abs((self.distance_f_L - self.position).length()) / 100), 2))
+        value_distance_L_text = font.render(value_distance_f_L, bool(1), pygame.Color("coral"))
+
+        return value_distance_L_text
+
+    #--------------------------------------------------------------------------------------------------------
+
     def update_death_time(self, death_time):
+
         death_time_val = str(death_time / 1000)
         death_time_text = font.render(death_time_val, bool(1), pygame.Color("coral"))
         return death_time_text
@@ -144,12 +234,11 @@ class Car(pygame.sprite.Sprite):
                 death_time = pygame.time.get_ticks()
                 perm_dt -= 1
 
-#mit dem auto:
 
 class Rand(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(ap.joinpath("rennstrecke_rand.png")).convert_alpha()
+        self.image = pygame.image.load(gA("rennstrecke_rand.png")).convert_alpha()
         self.position = vec(0, 0)
         self.original_image = self.image
         self.rect = self.original_image.get_rect()
@@ -159,7 +248,7 @@ class Rand(pygame.sprite.Sprite):
 class Ziel(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(ap.joinpath("rennstrecke_ziel.png")).convert_alpha()
+        self.image = pygame.image.load(gA("rennstrecke_ziel.png")).convert_alpha()
         self.position = vec(0, 0)
         self.original_image = self.image
         self.rect = self.original_image.get_rect()
@@ -167,7 +256,7 @@ class Ziel(pygame.sprite.Sprite):
 
 
 
-strecke = pygame.image.load(ap.joinpath("rennstrecke.png")).convert_alpha()
+strecke = pygame.image.load(gA("rennstrecke.png")).convert_alpha()
 all_sprites = pygame.sprite.Group()
 car = Car()
 rand = Rand()
@@ -176,6 +265,8 @@ all_sprites.add(ziel, rand, car)
 
 # engine
 loop = True
+car_image = pygame.image.load(gA("car_2.png")).convert_alpha()
+car_image_rot = pygame.transform.rotate(car_image, 90)
 while loop:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -187,17 +278,32 @@ while loop:
     car.touchfl()
     car.timecount()
     car.sensor_front()
-
+    car.sensor_back_R()
+    car.sensor_back_L()
+    car.sensor_front_R()
+    car.sensor_front_L()
     screen.blit(strecke, (0, 0))
     all_sprites.draw(screen)
-    if car.col_pos != None:
+    screen.blit(car_image_rot, (260, -350))
+
+    if car.col_pos is not None:
         pygame.draw.line(screen, pink, (0, 0), car.col_pos, width = 2)
 
-    pygame.draw.line(screen, blue, (car.position), (car.distance_pos) , width=2)
+    pygame.draw.line(screen, blue, (car.position), (car.distance_f) , width=2)
+    pygame.draw.line(screen, blue, (car.position), (car.distance_f_R), width=2)
+    pygame.draw.line(screen, blue, (car.position), (car.distance_f_L), width=2)
+    pygame.draw.line(screen, blue, (car.position - 4 * car.vel), (car.distance_R), width=2)
+    pygame.draw.line(screen, blue, (car.position - 4 * car.vel), (car.distance_L), width=2)
 
     screen.blit(update_fps(), (10, 10))
+
+    screen.blit(car.update_distance_f(), (607, 220))
+    screen.blit(car.update_distance_f_R(), (644, 240))
+    screen.blit(car.update_distance_f_L(), (570, 240))
+
     screen.blit(car.update_death_time(death_time), (10, 50))
     screen.blit(update_timer(), (10, 30))
+
     pygame.display.set_caption('Alex Maturarbeit')
     pygame.display.update()
 
