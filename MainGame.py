@@ -14,7 +14,7 @@ count = False
 death_time = 0
 perm_dt = 1
 pink = (153, 0, 153)
-blue = (176, 224, 230)
+blue = (176, 120, 230)
 distance = 0
 
 # FPS
@@ -54,23 +54,26 @@ class Car(pygame.sprite.Sprite):
         self.touch_line = 0
         self.col_line = None
         self.perm = True
+        self.sensor_hit = (0, 0)
 
         #pygame.draw.line(screen, blue, (car.position), (car.position + 30 * car.vel), width=2)
 
     def sensor_front(self):
         mask_R = pygame.mask.from_surface(pygame.image.load(ap.joinpath("rennstrecke_rand.png")).convert_alpha())
-        hit = False
-        distance_multiplier = 1
-        while not hit:
-            distance_pos = (self.position + distance_multiplier * car.vel)
-            pos_x = abs(int(distance_pos[0]))
-            pos_y = abs(int(distance_pos[1]))
+
+        for distance_multiplier in range(1, 129):
+            self.distance_pos = (self.position + 1.05 ** distance_multiplier * car.vel)
+            pos_x = abs(int(self.distance_pos[0]))
+            pos_y = abs(int(self.distance_pos[1]))
+            if pos_x >= 1279:
+                pos_x = 1279
+            if pos_y >= 719:
+                pos_y = 719
             sensor_hit = mask_R.get_at((pos_x, pos_y))
-            if sensor_hit == 0:
-                distance_multiplier += 15
-            else:
-                hit = True
-            print(sensor_hit)
+
+            if sensor_hit == 1:
+
+                break
 
     def update_death_time(self, death_time):
         death_time_val = str(death_time / 1000)
@@ -190,17 +193,12 @@ while loop:
     if car.col_pos != None:
         pygame.draw.line(screen, pink, (0, 0), car.col_pos, width = 2)
 
-    pygame.draw.line(screen, blue, (car.position), (car.position + 30*car.vel) , width=2)
-
-    #print(car.position + 30*car.vel)
-
+    pygame.draw.line(screen, blue, (car.position), (car.distance_pos) , width=2)
 
     screen.blit(update_fps(), (10, 10))
     screen.blit(car.update_death_time(death_time), (10, 50))
     screen.blit(update_timer(), (10, 30))
     pygame.display.set_caption('Alex Maturarbeit')
-    #print(distance)
-    #print(pygame.sprite.collide_mask(car, sensor_s))
     pygame.display.update()
 
     clock.tick(60)
