@@ -273,14 +273,16 @@ class Ziel(pygame.sprite.Sprite):
 if __name__ == '__main__':
     car_list = []
 
-    for n in range(10, 11):
+    for n in range(10, 30):
         car_list.append(Car(n))
 
+    print(car_list)
     strecke = pygame.image.load(gA("rennstrecke.png")).convert_alpha()
     all_sprites = pygame.sprite.Group()
     rand = Rand()
     ziel = Ziel()
     all_sprites.add(ziel, rand, *car_list)
+
 
     # engine
     loop = True
