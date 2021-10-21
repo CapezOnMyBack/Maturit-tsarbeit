@@ -1,104 +1,83 @@
-import random
-from MainGame import Car
-
 import numpy as np
-import random as rd
-
 from scipy.special import softmax
 
-input_n = 3
-# input_dict = {}
+input_n = 5
+
 hidden_n = 4
-# hidden_dict = {}
-weights1 = input_n * hidden_n
-# weights1_dict = {}
+
 output_n = 2
-# output_dict = {}
-weights2 = hidden_n * output_n
-# weights2_dict = {}
 
 
 def sigmoid_matrix(x):
     return 1 / (1 + np.exp(-x))
 
 
-input_1 = abs((Car.distance_f - Car.position).length()) / 100
-input_2 = abs((Car.distance_f_R - Car.position).length()) / 100
-input_3 = abs((Car.distance_f_L - Car.position).length()) / 100
-
-i1 = input_1
-i2 = input_2
-i3 = input_3
-
-i = np.array([i1, i2, i3])
+def create_inputs(car):
+    input_1 = abs((car.distance_f - car.position).length()) / 100
+    input_2 = abs((car.distance_f_R - car.position).length()) / 100
+    input_3 = abs((car.distance_f_L - car.position).length()) / 100
+    input_4 = abs((car.distance_R - car.position - 4 * car.vel).length()) / 100
+    input_5 = abs((car.distance_L - car.position - 4 * car.vel).length()) / 100
+    return np.array([input_1, input_2, input_3, input_4, input_5])
 
 
-# ----------------------------------
-# Weights 1:
+# -------------------------------------------------------------------------------------
+# Weights 1&2:
 
-w1_1 = rd.random()
-w1_2 = rd.random()
-w1_3 = rd.random()
-w1_4 = rd.random()
-
-w2_1 = rd.random()
-w2_2 = rd.random()
-w2_3 = rd.random()
-w2_4 = rd.random()
-
-w3_1 = rd.random()
-w3_2 = rd.random()
-w3_3 = rd.random()
-w3_4 = rd.random()
+def create_weights_1():
+    return np.random.uniform(low=-0.5, high=0.5, size=(input_n, hidden_n))
 
 
-w1 = np.array([[w1_1, w1_2, w1_3, w1_4], [w2_1, w2_2, w2_3, w2_4], [w3_1, w3_2, w3_3, w3_4]])
-
-# -------------------------------------
-
-w1_r = np.random.rand(input_n, hidden_n)
-
-net1 = np.dot(i, w1_r)
-# print(net1)
-act_hidden = sigmoid_matrix(net1)
-# print(act_hidden)
+def create_weights_2():
+    return np.random.uniform(low=-0.5, high=0.5, size=(hidden_n, output_n))
 
 
-# -----------------------------------
-# Weights 2:
+# ----------------------------------------------------------------------------------
+# Biases 1&2:
 
-w21_1 = rd.random()
-w21_2 = rd.random()
-
-w22_1 = rd.random()
-w22_2 = rd.random()
-
-w23_1 = rd.random()
-w23_2 = rd.random()
-
-w24_1 = rd.random()
-w24_2 = rd.random()
-
-w2 = np.array([[w21_1, w21_2], [w22_1, w22_2], [w23_1, w23_2], [w24_1, w24_2]])
-
-# -------------------------------------------
-
-w2_r = np.random.rand(hidden_n, output_n)
-
-net2 = np.dot(act_hidden, w2_r)
-# print(net2)
-act_output = softmax(net2)
-# print(act_output)
-# print(np.sum(act_output))
+def create_bias_1():
+    return np.random.uniform(low=-0.5, high=0.5, size=hidden_n)
 
 
-def direction_decision():
-    if act_output[0] > 60:
-        Car.goleft = 1
-        Car.goright = 0
-    elif act_output[1] > 60:
-        Car.goright = 1
-        Car.goleft = 0
-    else:
-        Car.goright = 0
-        Car.goleft = 0
+def create_bias_2():
+    return np.random.uniform(low=-0.5, high=0.5, size=output_n)
+
+
+# ------------------------------------------------------------------------------------
+
+def forward(x, w1, w2, b1, b2):
+    net1 = np.dot(x, w1) + b1
+    # print(net1)
+    act_hidden = sigmoid_matrix(net1)
+    # print(act_hidden)
+    net2 = np.dot(act_hidden, w2) + b2
+    # print(net2)
+    act_output = softmax(net2)
+    # print(act_output)
+    # print(np.sum(act_output))
+    return act_output
+
+
+# --------------------------------------------------------------------------------------
+
+def create_network(car):
+    w1 = create_weights_1()
+    w2 = create_weights_2()
+    b1 = create_bias_1()
+    b2 = create_bias_2()
+
+    def direction_decision():
+
+        output = forward(create_inputs(car), w1, w2, b1, b2)
+
+        if output[0] > 0.6:
+            car.goleft = 1
+            car.goright = 0
+        elif output[1] > 0.6:
+            car.goright = 1
+            car.goleft = 0
+        else:
+            car.goright = 0
+            car.goleft = 0
+
+    return direction_decision

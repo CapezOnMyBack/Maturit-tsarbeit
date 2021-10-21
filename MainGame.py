@@ -1,6 +1,8 @@
 import pygame
 from config import get_Asset as gA
+from config import ai_control
 from pygame.locals import *
+from BetterNN import create_network as cn
 
 
 # settings
@@ -11,7 +13,6 @@ vec = pygame.math.Vector2
 max_speed = 5
 dt = 0
 count = False
-perm_dt = 1
 pink = (153, 0, 153)
 blue = (56, 165, 255)
 distance = 0
@@ -38,8 +39,11 @@ def update_fps():
 
 # sprite(s)
 class Car(pygame.sprite.Sprite):
-    def __init__(self, n):
+
+    def __init__(self, n, rand, ziel):
         pygame.sprite.Sprite.__init__(self)
+        self.rand = rand
+        self.ziel = ziel
         self.image = pygame.image.load(gA("car_2.png")).convert_alpha()
         self.original_image = self.image
         self.position = vec(638, 440)
@@ -63,6 +67,9 @@ class Car(pygame.sprite.Sprite):
         self.death_time = 0
         self.goright = 0
         self.goleft = 0
+        self.alive = True
+        self.direction_decision = cn(self)
+        self.perm_dt = 1
 
     def __repr__(self):
         return f'<Car({self.n})>'
@@ -195,6 +202,21 @@ class Car(pygame.sprite.Sprite):
 
     def update(self):
         global count
+
+        self.collision()
+        self.touchfl()
+        self.timecount()
+        self.sensor_front()
+        self.sensor_back_R()
+        self.sensor_back_L()
+        self.sensor_front_R()
+        self.sensor_front_L()
+        if ai_control:
+            self.direction_decision()
+        if not self.alive:
+            self.kill()
+            return
+
         keys = pygame.key.get_pressed()
         if self.perm:
             if keys[K_a] or self.goleft == 1:
@@ -216,7 +238,7 @@ class Car(pygame.sprite.Sprite):
         if self.vel.length() > max_speed:
             self.vel.scale_to_length(max_speed)
 
-        self.position += self.vel * (self.n * 0.4)
+        self.position += self.vel
         self.rect.center = self.position
 
     def rotate(self):
@@ -233,7 +255,7 @@ class Car(pygame.sprite.Sprite):
 
     def touchfl(self):
 
-        self.col_line = pygame.sprite.collide_mask(Car, Ziel)
+        self.col_line = pygame.sprite.collide_mask(self, self.ziel)
         if self.touch_line == 0:
             if self.col_line != None:
                 self.touch_line = 1
@@ -247,16 +269,14 @@ class Car(pygame.sprite.Sprite):
             self.roundtime = pygame.time.get_ticks()
 
     def collision(self):
-        global perm_dt
-        global dt
-        self.col_pos = pygame.sprite.collide_mask(Rand, Car)
+        self.col_pos = pygame.sprite.collide_mask(self.rand, self)
         if self.col_pos is not None:
             self.perm = False
             self.vel = vec(0, 0)
-            if perm_dt == 1:
-                dt = 1
+            if self.perm_dt == 1:
                 self.death_time = pygame.time.get_ticks()
-                perm_dt -= 1
+                self.alive = False
+                self.perm_dt -= 1
 
 
 class Rand(pygame.sprite.Sprite):
