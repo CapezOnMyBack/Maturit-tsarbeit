@@ -3,7 +3,7 @@ import pygame
 
 class Person(pygame.sprite.Sprite):
     def __init__(self, n):
-        super(Person, self).__init__()
+        # super(Person, self).__init__()
         self.name = n
 
     def __repr__(self):
@@ -14,7 +14,7 @@ class Person(pygame.sprite.Sprite):
 
 
 guest_list = []
-for n in range(1, 5):
+for n in range(1, 10):
     guest_list.append(Person(n))
 
 print(guest_list)

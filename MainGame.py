@@ -11,7 +11,6 @@ vec = pygame.math.Vector2
 max_speed = 5
 dt = 0
 count = False
-death_time = 0
 perm_dt = 1
 pink = (153, 0, 153)
 blue = (56, 165, 255)
@@ -28,13 +27,13 @@ def update_fps():
     return fps_text
 
 
-def update_timer():
-    global time_original
-    if car.touch_line == 0:
-        time_original = ((car.roundtime - car.time)/1000)
-    time = str(time_original)
-    time_text = font.render(time, bool(1), pygame.Color("coral"))
-    return time_text
+# def update_timer():
+    # global time_original
+    # if car.touch_line == 0:
+        # time_original = ((car.roundtime - car.time)/1000)
+    # time = str(time_original)
+    # time_text = font.render(time, bool(1), pygame.Color("coral"))
+    # return time_text
 
 
 # sprite(s)
@@ -61,6 +60,15 @@ class Car(pygame.sprite.Sprite):
         self.distance_f_L = (0.0, 0.0)
         self.mask_R = pygame.mask.from_surface(pygame.image.load(gA("rennstrecke_rand.png")).convert_alpha())
         self.n = n
+        self.death_time = 0
+        self.goright = 0
+        self.goleft = 0
+
+    def __repr__(self):
+        return f'<Car({self.n})>'
+
+    def __str__(self):
+        return self.__repr__()
 
     #---------------------------------------------------------------------------------------------------------
     #SENSOR FUNCTIONS:
@@ -179,34 +187,36 @@ class Car(pygame.sprite.Sprite):
 
     #--------------------------------------------------------------------------------------------------------
 
-    def update_death_time(self, death_time):
+    #def update_death_time(self, self.death_time):
 
-        death_time_val = str(death_time / 1000)
-        death_time_text = font.render(death_time_val, bool(1), pygame.Color("coral"))
-        return death_time_text
+        #death_time_val = str(self.death_time / 1000)
+        #death_time_text = font.render(death_time_val, bool(1), pygame.Color("coral"))
+        #return death_time_text
 
     def update(self):
         global count
         keys = pygame.key.get_pressed()
         if self.perm:
-            if keys[K_a]:
+            if keys[K_a] or self.goleft == 1:
                 self.angle_speed = -4
                 self.rotate()
-            if keys[K_d]:
+                self.goleft = 0
+            if keys[K_d] or self.goright == 1:
                 self.angle_speed = 4
                 self.rotate()
-            if keys[K_w]:
+                self.goright = 0
+            if not keys[K_w]:
                 self.vel += self.acceleration
                 if not count:
                     self.time = pygame.time.get_ticks()
                     count = True
-            if not keys[K_w]:
+            if keys[K_w]:
                 self.vel = vec(0, 0)
 
         if self.vel.length() > max_speed:
             self.vel.scale_to_length(max_speed)
 
-        self.position += self.vel * (self.n / 10)
+        self.position += self.vel * (self.n * 0.4)
         self.rect.center = self.position
 
     def rotate(self):
@@ -223,7 +233,7 @@ class Car(pygame.sprite.Sprite):
 
     def touchfl(self):
 
-        self.col_line = pygame.sprite.collide_mask(car, ziel)
+        self.col_line = pygame.sprite.collide_mask(Car, Ziel)
         if self.touch_line == 0:
             if self.col_line != None:
                 self.touch_line = 1
@@ -239,14 +249,13 @@ class Car(pygame.sprite.Sprite):
     def collision(self):
         global perm_dt
         global dt
-        global death_time
-        self.col_pos = pygame.sprite.collide_mask(rand, car)
+        self.col_pos = pygame.sprite.collide_mask(Rand, Car)
         if self.col_pos is not None:
             self.perm = False
-            car.vel = vec(0, 0)
+            self.vel = vec(0, 0)
             if perm_dt == 1:
                 dt = 1
-                death_time = pygame.time.get_ticks()
+                self.death_time = pygame.time.get_ticks()
                 perm_dt -= 1
 
 
@@ -270,69 +279,3 @@ class Ziel(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
 
 
-if __name__ == '__main__':
-    car_list = []
-
-    for n in range(10, 30):
-        car_list.append(Car(n))
-
-    print(car_list)
-    strecke = pygame.image.load(gA("rennstrecke.png")).convert_alpha()
-    all_sprites = pygame.sprite.Group()
-    rand = Rand()
-    ziel = Ziel()
-    all_sprites.add(ziel, rand, *car_list)
-
-
-    # engine
-    loop = True
-    car_image = pygame.image.load(gA("car_2.png")).convert_alpha()
-    car_image_rot = pygame.transform.rotate(car_image, 90)
-    while loop:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit(0)
-
-        all_sprites.update()
-
-        for car in car_list:
-
-            car.collision()
-            car.touchfl()
-            car.timecount()
-            car.sensor_front()
-            car.sensor_back_R()
-            car.sensor_back_L()
-            car.sensor_front_R()
-            car.sensor_front_L()
-
-        screen.blit(strecke, (0, 0))
-        all_sprites.draw(screen)
-        screen.blit(car_image_rot, (260, -350))
-
-        if car.col_pos is not None:
-            pygame.draw.line(screen, pink, (0, 0), car.col_pos, width = 2)
-
-        pygame.draw.line(screen, blue, (car.position), (car.distance_f) , width=2)
-        pygame.draw.line(screen, blue, (car.position), (car.distance_f_R), width=2)
-        pygame.draw.line(screen, blue, (car.position), (car.distance_f_L), width=2)
-        pygame.draw.line(screen, blue, (car.position - 4 * car.vel), (car.distance_R), width=2)
-        pygame.draw.line(screen, blue, (car.position - 4 * car.vel), (car.distance_L), width=2)
-
-        screen.blit(update_fps(), (10, 10))
-
-        screen.blit(car.update_distance_f(), (607, 220))
-        screen.blit(car.update_distance_f_R(), (644, 240))
-        screen.blit(car.update_distance_f_L(), (570, 240))
-        screen.blit(car.update_distance_b_R(), (570, 295))
-        screen.blit(car.update_distance_b_L(), (644, 295))
-
-
-        screen.blit(car.update_death_time(death_time), (10, 50))
-        screen.blit(update_timer(), (10, 30))
-
-        pygame.display.set_caption('Alex Maturarbeit')
-        pygame.display.update()
-
-        clock.tick(60)

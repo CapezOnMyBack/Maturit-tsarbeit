@@ -5,3 +5,6 @@ asset_path = root_path.joinpath("assets")
 
 def get_Asset(name):
     return str(asset_path.joinpath(name))
+
+def nutte():
+    return "lol"

@@ -12,7 +12,7 @@ output_layers = 2
 output_layers_list = []
 weights2 = hidden_layers * output_layers
 weights2_list = []
-bias = 1
+bias = -0.7
 
 
 def sigmoid(s):
@@ -45,7 +45,7 @@ def create_hidden_layer_list():
         zw = 0
 
         for y in range(0, inputs - 1):
-            zw += inputs_list[y] * (weights1_list[y * hidden_layers] + x)
+            zw += inputs_list[y] * (weights1_list[y * hidden_layers + 1])
 
         zw += bias
 
@@ -60,7 +60,7 @@ def create_output_layer_list():
         zw2 = 0
 
         for y in range(0, hidden_layers):
-            zw2 += hidden_layers_list[y] * (weights2_list[y * output_layers] + x)
+            zw2 += hidden_layers_list[y] * (weights2_list[y * output_layers + 1])
 
         zw2 += bias
 
