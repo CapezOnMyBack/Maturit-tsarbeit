@@ -46,7 +46,7 @@ class Car(pygame.sprite.Sprite):
         self.ziel = ziel
         self.image = pygame.image.load(gA("car_2.png")).convert_alpha()
         self.original_image = self.image
-        self.position = vec(638, 440)
+        self.position = vec(590, 440)
         self.rect = self.original_image.get_rect(center=self.position)
         self.vel = vec(0, 0)
         self.acceleration = vec(2, 0)

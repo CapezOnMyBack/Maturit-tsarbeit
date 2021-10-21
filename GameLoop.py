@@ -1,15 +1,15 @@
 from MainGame import *
-
+from config import amount as y
 if __name__ == '__main__':
 
-    strecke = pygame.image.load(gA("rennstrecke.png")).convert_alpha()
+    strecke = pygame.image.load(gA("rennstrecke_weg.png")).convert_alpha()
     all_sprites = pygame.sprite.Group()
     rand = Rand()
     ziel = Ziel()
 
     car_list = []
 
-    for n in range(1, 201):
+    for n in range(1, y + 1):
         car = Car(n, rand, ziel)
         car_list.append(car)
 

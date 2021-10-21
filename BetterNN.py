@@ -7,6 +7,8 @@ hidden_n = 4
 
 output_n = 2
 
+wr = 1.0
+
 
 def sigmoid_matrix(x):
     return 1 / (1 + np.exp(-x))
@@ -25,22 +27,22 @@ def create_inputs(car):
 # Weights 1&2:
 
 def create_weights_1():
-    return np.random.uniform(low=-0.5, high=0.5, size=(input_n, hidden_n))
+    return np.random.uniform(low=-wr, high=wr, size=(input_n, hidden_n))
 
 
 def create_weights_2():
-    return np.random.uniform(low=-0.5, high=0.5, size=(hidden_n, output_n))
+    return np.random.uniform(low=-wr, high=wr, size=(hidden_n, output_n))
 
 
 # ----------------------------------------------------------------------------------
 # Biases 1&2:
 
 def create_bias_1():
-    return np.random.uniform(low=-0.5, high=0.5, size=hidden_n)
+    return np.random.uniform(low=-wr, high=wr, size=hidden_n)
 
 
 def create_bias_2():
-    return np.random.uniform(low=-0.5, high=0.5, size=output_n)
+    return np.random.uniform(low=-wr, high=wr, size=output_n)
 
 
 # ------------------------------------------------------------------------------------
