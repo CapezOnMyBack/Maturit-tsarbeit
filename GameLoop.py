@@ -25,18 +25,32 @@ if __name__ == '__main__':
     pygame.display.set_caption('Alex Maturarbeit')
 
     while loop:
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit(0)
 
-        print(all_sprites)
+        if len(all_sprites) == 2:
+            clock.tick(60)
+            break
 
-        for i, car in enumerate(car_list):
+        if len(car_list) > 2:
 
-            if not car.alive:
-                car_list.pop(i)
-                continue
+            for i, car in enumerate(car_list):
+
+                if not car.alive:
+                    car.kill()
+                    car_list.pop(i)
+                    continue
+        elif len(car_list) <= 2:
+
+            for i, car in enumerate(car_list):
+
+                if not car.alive:
+                    car.kill()
+                    continue
+
 
         all_sprites.update()
 
@@ -45,11 +59,11 @@ if __name__ == '__main__':
 
         screen.blit(car_image_rot, (260, -350))
 
-        pygame.draw.line(screen, blue, (car.position), (car.distance_f) , width=2)
-        pygame.draw.line(screen, blue, (car.position), (car.distance_f_R), width=2)
-        pygame.draw.line(screen, blue, (car.position), (car.distance_f_L), width=2)
-        pygame.draw.line(screen, blue, (car.position - 4 * car.vel), (car.distance_R), width=2)
-        pygame.draw.line(screen, blue, (car.position - 4 * car.vel), (car.distance_L), width=2)
+        pygame.draw.line(screen, blue, (car.position), (car.sensor_f_hit), width=2)
+        pygame.draw.line(screen, blue, (car.position), (car.sensor_f_R_hit), width=2)
+        pygame.draw.line(screen, blue, (car.position), (car.sensor_f_L_hit), width=2)
+        pygame.draw.line(screen, blue, (car.position - 4 * car.vel), (car.sensor_R_hit), width=2)
+        pygame.draw.line(screen, blue, (car.position - 4 * car.vel), (car.sensor_L_hit), width=2)
 
         screen.blit(update_fps(), (10, 10))
 
@@ -66,3 +80,5 @@ if __name__ == '__main__':
         pygame.display.update()
 
         clock.tick(60)
+
+    print(car_list)
