@@ -1,5 +1,7 @@
 from MainGame import *
-from config import amount as y
+from config import amount as y, architecture, time_margin, w, b
+
+
 if __name__ == '__main__':
 
     strecke = pygame.image.load(gA("rennstrecke_weg.png")).convert_alpha()
@@ -10,7 +12,7 @@ if __name__ == '__main__':
     car_list = []
 
     for n in range(1, y + 1):
-        car = Car(n, rand, ziel)
+        car = Car(n, rand, ziel, Network.new(weights=w, biases=b, architecture=architecture))
         car_list.append(car)
 
     all_sprites.add(ziel, rand, *car_list)
@@ -33,6 +35,13 @@ if __name__ == '__main__':
 
         if len(all_sprites) == 2:
             clock.tick(60)
+
+            death_time1 = car_list[0].death_time
+            death_time2 = car_list[1].death_time
+
+            if abs(death_time2 - death_time1) >= time_margin:
+                car_list.pop(1 if death_time1 > death_time2 else 0)
+
             break
 
         if len(car_list) > 2:
@@ -43,14 +52,13 @@ if __name__ == '__main__':
                     car.kill()
                     car_list.pop(i)
                     continue
-        elif len(car_list) <= 2:
+        elif len(car_list) == 2:
 
             for i, car in enumerate(car_list):
 
                 if not car.alive:
                     car.kill()
                     continue
-
 
         all_sprites.update()
 
@@ -82,3 +90,5 @@ if __name__ == '__main__':
         clock.tick(60)
 
     print(car_list)
+    for i, car in enumerate(car_list):
+        print(f'Car weights:{car.network.weights} and biases:{car.network.biases}')
