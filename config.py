@@ -9,8 +9,6 @@ wr = 1.0
 
 architecture = [5, 11, 2]
 
-time_margin = 1000 * 0.2
-
 root_path = Path(__file__).parent
 asset_path = root_path.joinpath("assets")
 
