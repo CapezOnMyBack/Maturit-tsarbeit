@@ -19,12 +19,7 @@ distance = 0
 # FPS
 clock = pygame.time.Clock()
 font = pygame.font.SysFont("Arial", 18)
-
-
-def update_fps():
-    fps = str(int(clock.get_fps()))
-    fps_text = font.render(fps, bool(1), pygame.Color("coral"))
-    return fps_text
+font_2 = pygame.font.SysFont("Arial", 25)
 
 
 # def update_timer():
@@ -45,7 +40,7 @@ class Car(pygame.sprite.Sprite):
         self.ziel = ziel
         self.image = pygame.image.load(gA("car_2.png")).convert_alpha()
         self.original_image = self.image
-        self.position = vec(590, 440)
+        self.position = vec(590, 450)
         self.rect = self.original_image.get_rect(center=self.position)
         self.vel = vec(0, 0)
         self.acceleration = vec(2, 0)
@@ -61,6 +56,8 @@ class Car(pygame.sprite.Sprite):
         self.sensor_L_hit = vec(0.0, 0.0)
         self.sensor_f_R_hit = vec(0.0, 0.0)
         self.sensor_f_L_hit = vec(0.0, 0.0)
+        self.sensor_s_R_hit = vec(0.0, 0.0)
+        self.sensor_s_L_hit = vec(0.0, 0.0)
         self.mask_R = pygame.mask.from_surface(pygame.image.load(gA("rennstrecke_rand.png")).convert_alpha())
         self.n = n
         self.death_time = 0
@@ -116,6 +113,36 @@ class Car(pygame.sprite.Sprite):
             self.sensor_f_L_hit = (self.position + 1.5 ** (distance_multiplier / 6) * self.vel.rotate(-30))
             pos_x = abs(int(self.sensor_f_L_hit[0]))
             pos_y = abs(int(self.sensor_f_L_hit[1]))
+            if pos_x >= 1279:
+                pos_x = 1279
+            if pos_y >= 719:
+                pos_y = 719
+            sensor_hit = self.mask_R.get_at((pos_x, pos_y))
+
+            if sensor_hit == 1:
+                break
+
+    def sensor_side_R(self):
+
+        for distance_multiplier in range(1, 80):
+            self.sensor_s_R_hit = (self.position + 1.5 ** (distance_multiplier / 6) * self.vel.rotate(50))
+            pos_x = abs(int(self.sensor_s_R_hit[0]))
+            pos_y = abs(int(self.sensor_s_R_hit[1]))
+            if pos_x >= 1279:
+                pos_x = 1279
+            if pos_y >= 719:
+                pos_y = 719
+            sensor_hit = self.mask_R.get_at((pos_x, pos_y))
+
+            if sensor_hit == 1:
+                break
+
+    def sensor_side_L(self):
+
+        for distance_multiplier in range(1, 80):
+            self.sensor_s_L_hit = (self.position + 1.5 ** (distance_multiplier / 6) * self.vel.rotate(-50))
+            pos_x = abs(int(self.sensor_s_L_hit[0]))
+            pos_y = abs(int(self.sensor_s_L_hit[1]))
             if pos_x >= 1279:
                 pos_x = 1279
             if pos_y >= 719:
@@ -205,13 +232,15 @@ class Car(pygame.sprite.Sprite):
         # return death_time_text
     # --------------------------------------------------------------------------------------------------------
 
-    def calc_distances(self) ->np.ndarray:
+    def calc_distances(self) -> np.ndarray:
         input_1 = (self.sensor_f_hit - self.position).length()
         input_2 = (self.sensor_f_R_hit - self.position).length()
         input_3 = (self.sensor_f_L_hit - self.position).length()
-        input_4 = (self.sensor_R_hit - self.position).length()
-        input_5 = (self.sensor_L_hit - self.position).length()
-        return np.array([input_1, input_2, input_3, input_4, input_5]) / 100
+        input_4 = (self.sensor_s_R_hit - self.position).length()
+        input_5 = (self.sensor_s_L_hit - self.position).length()
+        input_6 = (self.sensor_R_hit - self.position).length()
+        input_7 = (self.sensor_L_hit - self.position).length()
+        return np.array([input_1, input_2, input_3, input_4, input_5, input_6, input_7]) / 100
 
     # --------------------------------------------------------------------------------------------------------
 
@@ -220,13 +249,13 @@ class Car(pygame.sprite.Sprite):
         activations = self.calc_distances()
         output = self.network.forward(activations=activations)
 
-        if output[0] > 0.6:
-            self.goleft = 1
-            self.goright = 0
-        elif output[1] > 0.6:
+        if output.argmax() == 0:
             self.goright = 1
             self.goleft = 0
-        else:
+        elif output.argmax() == 1:
+            self.goright = 0
+            self.goleft = 1
+        elif output.argmax() == 2:
             self.goright = 0
             self.goleft = 0
 
@@ -237,6 +266,8 @@ class Car(pygame.sprite.Sprite):
         self.sensor_front()
         self.sensor_back_R()
         self.sensor_back_L()
+        self.sensor_side_R()
+        self.sensor_side_L()
         self.sensor_front_R()
         self.sensor_front_L()
 

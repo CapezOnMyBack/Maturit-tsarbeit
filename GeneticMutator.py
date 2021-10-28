@@ -1,52 +1,29 @@
-import random
-
 import numpy as np
-import random
 
-from BetterNN import Network
 
-margin = 2
+def mutator_w(w, margin):
 
-def mutator_w(w, margin) -> Network:
-    
-    mutated_weights = []
-    delta_w = []
+    weights_list = []
     
     for weights in w:
 
-        for l in weights:
+        low = (weights * (margin / 100)) * (-1)
+        high = weights * (margin / 100)
+        delta_w = np.random.uniform(low=low, high=high, size=weights.shape)
+        weights_list.append(weights + delta_w)
 
-            for i in l:
+    return weights_list
 
-                low = i * (1.0 - margin / 100)
-                high = i * (1.0 + margin / 100)
-                delta_w.append(random.uniform(low, high))
 
-        mutated_weights.append(weights + np.array(delta_w).reshape(weights.shape))
-        delta_w.clear()
-        
-        w = mutated_weights
-        return w
-        
-def mutator_b(b, margin) -> Network:
-    mutated_biases = []
-    delta_b = []
-     
+def mutator_b(b, margin):
+
+    biases_list = []
+
     for biases in b:
-        
-        for l in biases:
-            
-            for i in l:
-                
-                low = i * (1.0 - margin / 100)
-                high = i * (1.0 + margin / 100)
-                delta_b.append(random.uniform(low, high))
-                
-        mutated_biases.append(biases + np.array(delta_b).reshape(biases.shape))
-        delta_b.clear()
-        
-    b = mutated_biases
-    
-    return b
 
-    # TODO: Ändern zu np.random.unify(), weil es arrays ebenfalls annimmt... ;-;
+        low = (biases * (margin / 100)) * (-1)
+        high = biases * (margin / 100)
+        delta_b = np.random.uniform(low=low, high=high, size=biases.shape)
+        biases_list.append(biases + delta_b)
+    
+    return biases_list
