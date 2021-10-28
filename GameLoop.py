@@ -2,6 +2,7 @@ from MainGame import *
 from config import amount as y, architecture, w, b
 import pickle as p
 from pathlib import Path
+from GeneticMutator import mutator_w, mutator_b
 
 
 def gameloop():
@@ -20,7 +21,7 @@ def gameloop():
                 w, b = p.load(f)
 
                 for n in range(1, y + 1):
-                    car = Car(n, rand, ziel, Network.new(weights=w, biases=b, architecture=architecture))
+                    car = Car(n, rand, ziel, Network.new(weights=mutator_w(w), biases=mutator_b(b), architecture=architecture))
                     car_list.append(car)
 
         else:
