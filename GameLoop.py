@@ -5,8 +5,49 @@ from pathlib import Path
 from GeneticMutator import mutator_w, mutator_b
 
 gen = 1
+frames = 0
+
+
+def amount_cutter():
+    global y
+
+    if gen >= 2:
+        if y > 5:
+            y *= (0.5 ** (gen / 2))
+            y = int(y)
+
+            if y < 5:
+                y = 5
+
+
+def margin_changer():
+    global margin
+
+    if margin > 1:
+        if gen >= 2:
+            margin *= 0.5
+            margin = int(margin)
+
+            if margin < 1:
+                margin = 1
+
+
+def generation():
+    y = f'Generation:{str(int(gen))}'
+    gen_text = font_2.render(y, bool(1), pygame.Color("black"))
+    return gen_text
+
+
+def margins():
+    u = f'Current Margin:{str(int(margin))}'
+    gen_text = font_2.render(u, bool(1), pygame.Color("black"))
+    return gen_text
+
 
 def gameloop():
+
+    global gen
+    global frames
 
     all_sprites = pygame.sprite.Group()
 
@@ -15,13 +56,6 @@ def gameloop():
         x = f'Cars alive:{str(int(len(all_sprites) - 2))}'
         instance_text = font_2.render(x, bool(1), pygame.Color("black"))
         return instance_text
-
-
-    def generation():
-
-        y = f'Generation:{str(int(gen))}'
-        gen_text = font_2.render(y, bool(1), pygame.Color("black"))
-        return gen_text
 
     if __name__ == '__main__':
 
@@ -33,7 +67,7 @@ def gameloop():
 
         if Path('cached_network.pickle').exists():
             with open('cached_network.pickle', "rb") as f:
-                w, b = p.load(f)
+                w, b, gen = p.load(f)
 
                 car = Car(1, rand, ziel, Network.new(w, b, architecture))
                 car_list.append(car)
@@ -95,7 +129,7 @@ def gameloop():
                         car.kill()
                         continue
 
-            all_sprites.update()
+            all_sprites.update(frames)
 
             screen.blit(strecke, (0, 0))
             all_sprites.draw(screen)
@@ -112,6 +146,8 @@ def gameloop():
 
             screen.blit(instance_amount(), (15, 15))
             screen.blit(generation(), (15, 35))
+            screen.blit(margins(), (15, 55))
+            screen.blit(car_list[0].update_alive_timer(), (15, 75))
 
             # screen.blit(car.update_distance_f(), (607, 220))
             # screen.blit(car.update_distance_f_R(), (644, 240))
@@ -125,12 +161,14 @@ def gameloop():
             pygame.display.update()
 
             clock.tick(60)
+            frames += 1
 
-        print(car_list)
+        gen += 1
         with open('cached_network.pickle', "wb") as f:
-            p.dump((car.network.weights, car.network.biases), f)
+            p.dump((car.network.weights, car.network.biases, gen), f)
 
 
 while True:
+    amount_cutter()
+    margin_changer()
     gameloop()
-    gen += 1

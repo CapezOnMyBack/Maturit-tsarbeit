@@ -11,10 +11,11 @@ width, height = 1280, 720
 screen = pygame.display.set_mode((width, height))
 vec = pygame.math.Vector2
 max_speed = 5
-dt = 0
 pink = (153, 0, 153)
 blue = (56, 165, 255)
 distance = 0
+global_dt = 0
+
 
 # FPS
 clock = pygame.time.Clock()
@@ -48,8 +49,8 @@ class Car(pygame.sprite.Sprite):
         self.angle = 0
         self.time = 0
         self.roundtime = 0
-        self.touch_line = 0
-        self.col_line = None
+        self.touch_line = False
+        self.single_tl_output = False
         self.perm = True
         self.sensor_f_hit = vec(0.0, 0.0)
         self.sensor_R_hit = vec(0.0, 0.0)
@@ -61,6 +62,7 @@ class Car(pygame.sprite.Sprite):
         self.mask_R = pygame.mask.from_surface(pygame.image.load(gA("rennstrecke_rand.png")).convert_alpha())
         self.n = n
         self.death_time = 0
+        self.time_alive = 0
         self.goright = 0
         self.goleft = 0
         self.alive = True
@@ -225,11 +227,11 @@ class Car(pygame.sprite.Sprite):
 
     # --------------------------------------------------------------------------------------------------------
 
-    # def update_death_time(self, self.death_time):
+    def update_alive_timer(self):
 
-        # death_time_val = str(self.death_time / 1000)
-        # death_time_text = font.render(death_time_val, bool(1), pygame.Color("coral"))
-        # return death_time_text
+        alive_time_val = f'Survival Time:{str(self.time_alive)}'
+        alive_time_text = font_2.render(alive_time_val, bool(1), pygame.Color("black"))
+        return alive_time_text
     # --------------------------------------------------------------------------------------------------------
 
     def calc_distances(self) -> np.ndarray:
@@ -261,7 +263,7 @@ class Car(pygame.sprite.Sprite):
 
     # --------------------------------------------------------------------------------------------------------
 
-    def update(self):
+    def update(self, frames):
 
         self.sensor_front()
         self.sensor_back_R()
@@ -274,10 +276,10 @@ class Car(pygame.sprite.Sprite):
         if ai_control:
             self.direction_decision()
 
-        self.direction_decision()
-        self.collision()
+        self.collision(frames)
         self.touchfl()
-        self.timecount()
+        self.timecount(frames)
+        self.alive_time(frames)
 
         keys = pygame.key.get_pressed()
         if self.perm:
@@ -317,26 +319,32 @@ class Car(pygame.sprite.Sprite):
 
     def touchfl(self):
 
-        self.col_line = pygame.sprite.collide_mask(self, self.ziel)
-        if self.touch_line == 0:
-            if self.col_line is not None:
-                self.touch_line = 1
-        if self.touch_line == 1:
-            if self.col_line is None:
-                self.touch_line = 0
+    # When touching the finishline, give ONE single output
 
-    def timecount(self):
+        if pygame.sprite.collide_mask(self, self.ziel) is not None:
+            self.single_tl_output = True
+            self.touch_line = True
+        elif pygame.sprite.collide_mask(self, self.ziel) is None:
+            self.touch_line = False
 
-        if self.touch_line == 1:
-            self.roundtime = pygame.time.get_ticks()
+    def alive_time(self, frames):
 
-    def collision(self):
+        self.time_alive = round(((frames / 60) - global_dt), 3)
+
+    def timecount(self, frames):
+
+        if self.touch_line:
+            self.roundtime = frames
+
+    def collision(self, frames):
+        global global_dt
         self.col_pos = pygame.sprite.collide_mask(self.rand, self)
         if self.col_pos is not None:
             self.perm = False
             self.vel = vec(0, 0)
             if self.perm_dt:
-                self.death_time = pygame.time.get_ticks()
+                self.death_time = frames / 60
+                global_dt = self.death_time
                 self.alive = False
                 self.perm_dt = False
 
