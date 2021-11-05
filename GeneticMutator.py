@@ -7,8 +7,8 @@ def mutator_w(w, margin):
     
     for weights in w:
 
-        low = (weights * (margin / 100)) * (-1)
         high = weights * (margin / 100)
+        low = high * (-1)
         delta_w = np.random.uniform(low=low, high=high, size=weights.shape)
         weights_list.append(weights + delta_w)
 
@@ -21,8 +21,8 @@ def mutator_b(b, margin):
 
     for biases in b:
 
-        low = (biases * (margin / 100)) * (-1)
         high = biases * (margin / 100)
+        low = high * (-1)
         delta_b = np.random.uniform(low=low, high=high, size=biases.shape)
         biases_list.append(biases + delta_b)
     

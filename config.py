@@ -1,12 +1,12 @@
 from pathlib import Path
 
-amount = 1
+amount = 200
 
-ai_control = False
+ai_control = True
 
 wr = 1.0
 
-architecture = [7, 11, 3]
+architecture = [7, 6, 3]
 
 # Mutation margin in %:
 margin = 30

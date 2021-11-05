@@ -72,4 +72,6 @@ class Network:
         net = np.dot(activations, self.weights[-1]) + self.biases[-1]
         return softmax(net)
 
+    # Todo: Softmax really usefull?
+
 # --------------------------------------------------------------------------------------

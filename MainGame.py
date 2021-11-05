@@ -157,7 +157,7 @@ class Car(pygame.sprite.Sprite):
     def sensor_back_R(self):
 
         for distance_multiplier in range(1, 80):
-            self.sensor_R_hit = ((self.position - 4 * self.vel)
+            self.sensor_R_hit = (self.position
                                  + 1.5 ** (distance_multiplier / 6) * self.vel.rotate(90))
             pos_x = abs(int(self.sensor_R_hit[0]))
             pos_y = abs(int(self.sensor_R_hit[1]))
@@ -173,7 +173,7 @@ class Car(pygame.sprite.Sprite):
     def sensor_back_L(self):
 
         for distance_multiplier in range(1, 80):
-            self.sensor_L_hit = ((self.position - 4 * self.vel)
+            self.sensor_L_hit = (self.position
                                  + 1.5 ** (distance_multiplier / 6) * self.vel.rotate(-90))
             pos_x = abs(int(self.sensor_L_hit[0]))
             pos_y = abs(int(self.sensor_L_hit[1]))
@@ -243,6 +243,8 @@ class Car(pygame.sprite.Sprite):
         input_6 = (self.sensor_R_hit - self.position).length()
         input_7 = (self.sensor_L_hit - self.position).length()
         return np.array([input_1, input_2, input_3, input_4, input_5, input_6, input_7]) / 100
+
+    # Todo: Normalisierung mit 100 etwas "krass"
 
     # --------------------------------------------------------------------------------------------------------
 
