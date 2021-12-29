@@ -6,30 +6,31 @@ from GeneticMutator import mutator_w, mutator_b
 
 gen = 1
 frames = 0
+pop = pygame.mixer.Sound(gA("pop.wav"))
+pop.set_volume(0.05)
 
 
 def amount_cutter():
     global y
 
     if gen >= 2:
-        if y > 5:
-            y *= (0.5 ** (gen / 2))
+        if y > 100:
+            y *= (0.75 ** (gen / 2))
             y = int(y)
 
-            if y < 5:
-                y = 5
+            if y < 100:
+                y = 100
 
 
 def margin_changer():
     global margin
 
     if margin > 1:
-        if gen >= 2:
-            margin *= 0.5
-            margin = int(margin)
+        if gen >= 1.5:
+            margin *= 0.9
 
-            if margin < 1:
-                margin = 1
+            if margin < 1.5:
+                margin = 1.5
 
 
 def generation():
@@ -48,6 +49,7 @@ def gameloop():
 
     global gen
     global frames
+    global w, b
 
     all_sprites = pygame.sprite.Group()
 
@@ -59,8 +61,8 @@ def gameloop():
 
     if __name__ == '__main__':
 
-        strecke = pygame.image.load(gA("rennstrecke_weg.png")).convert_alpha()
-        rand = Rand()
+        strecke = pygame.image.load(gA("rennstrecke_weg_grass.png")).convert_alpha()
+        rand = Border()
         ziel = Ziel()
 
         car_list = []
@@ -87,9 +89,6 @@ def gameloop():
         # engine
 
         loop = True
-
-        car_image = pygame.image.load(gA("car_2.png")).convert_alpha()
-        car_image_rot = pygame.transform.rotate(car_image, 90)
 
         pygame.display.set_caption('Alex Maturarbeit')
 
@@ -119,6 +118,7 @@ def gameloop():
                     if not car.alive:
                         car.kill()
                         car_list.pop(i)
+                        pop.play()
                         continue
 
             elif len(car_list) == 1:
@@ -127,6 +127,7 @@ def gameloop():
 
                     if not car.alive:
                         car.kill()
+                        pop.play()
                         continue
 
             all_sprites.update(frames)
@@ -134,36 +135,18 @@ def gameloop():
             screen.blit(strecke, (0, 0))
             all_sprites.draw(screen)
 
-            # screen.blit(car_image_rot, (260, -350))
-
-            # pygame.draw.line(screen, blue, (car.position), (car.sensor_f_hit), width=2)
-            # pygame.draw.line(screen, blue, (car.position), (car.sensor_f_R_hit), width=2)
-            # pygame.draw.line(screen, blue, (car.position), (car.sensor_f_L_hit), width=2)
-            # pygame.draw.line(screen, blue, (car.position), (car.sensor_s_R_hit), width=2)
-            # pygame.draw.line(screen, blue, (car.position), (car.sensor_s_L_hit), width=2)
-            # pygame.draw.line(screen, blue, (car.position - 4 * car.vel), (car.sensor_R_hit), width=2)
-            # pygame.draw.line(screen, blue, (car.position - 4 * car.vel), (car.sensor_L_hit), width=2)
-
             screen.blit(instance_amount(), (15, 15))
             screen.blit(generation(), (15, 35))
             screen.blit(margins(), (15, 55))
             screen.blit(car_list[0].update_alive_timer(), (15, 75))
-
-            # screen.blit(car.update_distance_f(), (607, 220))
-            # screen.blit(car.update_distance_f_R(), (644, 240))
-            # screen.blit(car.update_distance_f_L(), (570, 240))
-            # screen.blit(car.update_distance_b_R(), (570, 295))
-            # screen.blit(car.update_distance_b_L(), (644, 295))
-
-            # screen.blit(car.update_death_time(car.death_time), (10, 50))
-            # screen.blit(update_timer(), (10, 30))
 
             pygame.display.update()
 
             clock.tick(60)
             frames += 1
 
-        gen += 1
+        if margin != 0:
+            gen += 1
         with open('cached_network.pickle', "wb") as f:
             p.dump((car.network.weights, car.network.biases, gen), f)
 

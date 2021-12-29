@@ -23,15 +23,6 @@ font = pygame.font.SysFont("Arial", 18)
 font_2 = pygame.font.SysFont("Arial", 25)
 
 
-# def update_timer():
-#     global time_original
-#     if car.touch_line == 0:
-#         time_original = ((car.roundtime - car.time)/1000)
-#     time = str(time_original)
-#     time_text = font.render(time, bool(1), pygame.Color("coral"))
-#     return time_text
-
-
 # sprite(s)
 class Car(pygame.sprite.Sprite):
 
@@ -39,9 +30,9 @@ class Car(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.rand = rand
         self.ziel = ziel
-        self.image = pygame.image.load(gA("car_2.png")).convert_alpha()
+        self.image = pygame.image.load(gA("auto.png")).convert_alpha()
         self.original_image = self.image
-        self.position = vec(590, 450)
+        self.position = vec(570, 450)
         self.rect = self.original_image.get_rect(center=self.position)
         self.vel = vec(0, 0)
         self.acceleration = vec(2, 0)
@@ -59,7 +50,7 @@ class Car(pygame.sprite.Sprite):
         self.sensor_f_L_hit = vec(0.0, 0.0)
         self.sensor_s_R_hit = vec(0.0, 0.0)
         self.sensor_s_L_hit = vec(0.0, 0.0)
-        self.mask_R = pygame.mask.from_surface(pygame.image.load(gA("rennstrecke_rand.png")).convert_alpha())
+        self.mask_R = pygame.mask.from_surface(pygame.image.load(gA("rennstrecke_rand_grass.png")).convert_alpha())
         self.n = n
         self.death_time = 0
         self.time_alive = 0
@@ -186,8 +177,6 @@ class Car(pygame.sprite.Sprite):
             if sensor_hit == 1:
                 break
 
-    # TODO: Unify sensors into one function or BETTER: a CLASS!
-
     # ------------------------------------------------------------------------------------------------
     # DISTANCE TEXT UPDATES:
 
@@ -243,8 +232,6 @@ class Car(pygame.sprite.Sprite):
         input_6 = (self.sensor_R_hit - self.position).length()
         input_7 = (self.sensor_L_hit - self.position).length()
         return np.array([input_1, input_2, input_3, input_4, input_5, input_6, input_7]) / 100
-
-    # Todo: Normalisierung mit 100 etwas "krass"
 
     # --------------------------------------------------------------------------------------------------------
 
@@ -331,7 +318,7 @@ class Car(pygame.sprite.Sprite):
 
     def alive_time(self, frames):
 
-        self.time_alive = round(((frames / 60) - global_dt), 3)
+        self.time_alive = round(((frames / 60) - self.death_time), 3)
 
     def timecount(self, frames):
 
@@ -351,10 +338,10 @@ class Car(pygame.sprite.Sprite):
                 self.perm_dt = False
 
 
-class Rand(pygame.sprite.Sprite):
+class Border(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(gA("rennstrecke_rand.png")).convert_alpha()
+        self.image = pygame.image.load(gA("rennstrecke_rand_grass.png")).convert_alpha()
         self.position = vec(0, 0)
         self.original_image = self.image
         self.rect = self.original_image.get_rect()
@@ -365,7 +352,8 @@ class Ziel(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(gA("rennstrecke_ziel.png")).convert_alpha()
-        self.position = vec(0, 0)
+        self.x = 0
+        self.y = 0
         self.original_image = self.image
-        self.rect = self.original_image.get_rect()
+        self.rect = self.original_image.get_rect(top=self.y, left=self.x)
         self.mask = pygame.mask.from_surface(self.image)

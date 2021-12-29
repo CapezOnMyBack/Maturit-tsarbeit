@@ -35,34 +35,6 @@ class Network:
             self.biases.append(np.random.uniform(
                 low=-wr, high=wr, size=n))
 
-    # def create_inputs(car):
-    #     input_1 = abs((car.distance_f - car.position).length()) / 100
-    #     input_2 = abs((car.distance_f_R - car.position).length()) / 100
-    #     input_3 = abs((car.distance_f_L - car.position).length()) / 100
-    #     input_4 = abs((car.distance_R - car.position - 4 * car.vel).length()) / 100
-    #     input_5 = abs((car.distance_L - car.position - 4 * car.vel).length()) / 100
-    #     return np.array([input_1, input_2, input_3, input_4, input_5])
-
-    # -------------------------------------------------------------------------------------
-    # Weights 1&2:
-
-    # def create_weights_1():
-    #     return np.random.uniform(low=-wr, high=wr, size=(input_n, hidden_n))
-    #
-    # def create_weights_2():
-    #     return np.random.uniform(low=-wr, high=wr, size=(hidden_n, output_n))
-
-    # ----------------------------------------------------------------------------------
-    # Biases 1&2:
-
-    # def create_bias_1():
-    #     return np.random.uniform(low=-wr, high=wr, size=hidden_n)
-    #
-    # def create_bias_2():
-    #     return np.random.uniform(low=-wr, high=wr, size=output_n)
-
-    # ------------------------------------------------------------------------------------
-
     def forward(self, activations):
 
         for weights, biases in zip(self.weights[:-1], self.biases[:-1]):
